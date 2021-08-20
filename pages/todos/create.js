@@ -11,7 +11,6 @@ export default function Create() {
   const [title, setTitle] = useState("");
   const [limit, setLimit] = useState("");
   const [status, setStatus] = useState("未完了");
-  const [todos, setTodos] = useState([]);
 
   ////////関数エリア////////
   const inputTitle = (e) => {
@@ -49,24 +48,7 @@ export default function Create() {
     setTitle("");
     setLimit("");
     
-    // setTodos([...todos, { ...todoList }]);
-    
   };
-
-
-  const test=()=>{
-    db.collection("cities").doc("LA").set({
-      name: "Los Angeles",
-      state: "CA",
-      country: "USA"
-  })
-  .then(() => {
-      console.log("Document successfully written!");
-  })
-  .catch((error) => {
-      console.error("Error writing document: ", error);
-  });
-  }
   
 
   ////////描画エリア////////
@@ -120,7 +102,6 @@ export default function Create() {
       <br />
       <button onClick={inputTodos}>TODO作成</button>
 
-      <button onClick={test}>追加</button>
       <Link href="/todos">
         <button>TODO一覧へ戻る</button>
       </Link>
