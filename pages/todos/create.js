@@ -9,7 +9,7 @@ export default function Create() {
   ////////ステートエリア////////
   const [title, setTitle] = useState("");
   const [limit, setLimit] = useState("");
-  const [status, setStatus] = useState("未完了");
+  const [status, setStatus] = useState("");
 
   ////////関数エリア////////
   const inputTitle = (e) => {
@@ -36,18 +36,18 @@ export default function Create() {
       .add(todo)
       .then((docRef) => {
         console.log("Document written with ID: ", docRef.id);
-        alert('TODOが作成できました');
+        alert("TODOが作成できました");
       })
       .catch((error) => {
         console.error("Error adding document: ", error);
-        alert('TODO作成に失敗しました');
+        alert("TODO作成に失敗しました");
       });
 
     setTitle("");
     setLimit("");
   };
 
-  const check = title === "" || limit === "";
+  const check = title === "" || limit === "" || status === "";
 
   ////////描画エリア////////
   return (
@@ -89,9 +89,10 @@ export default function Create() {
         <label>
           進捗状況
           <select name="status" onChange={inputStatus}>
-            <option defaultValue value="未完了">
-              未完了
+            <option defaultValue value="">
+              選択してください
             </option>
+            <option value="未完了">未完了</option>
             <option value="途中">途中</option>
             <option value="完了">完了</option>
           </select>
@@ -110,6 +111,3 @@ export default function Create() {
     </>
   );
 }
-
-
-

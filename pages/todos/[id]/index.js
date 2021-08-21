@@ -1,59 +1,93 @@
 import firebase from "firebase/app";
 import "firebase/firestore";
 import Link from "next/link";
+import Router from "next/router";
 import { useEffect, useState } from "react";
 import { db } from "../../../src/lib/firebase";
 
 // post：getStaticPropsから取得したデータ
-export default ({todo}) => {
+export default ({ todo }) => {
+  ////////ステートエリア////////
   const [comment, setComment] = useState("");
   const [commentList, setCommentList] = useState([]);
 
+  ////////関数エリア////////
   const inputCmt = (e) => {
-    setComment(e.target.value)
+    setComment(e.target.value);
   };
 
-  const pushCmt =()=>{
-
+  const pushCmt = () => {
     const cmt = {
       comment: comment,
       datetime: firebase.firestore.Timestamp.now(),
-      todoId:todo.id
+      todoId: todo.id,
     };
 
     db.collection("comments")
       .add(cmt)
       .then((docRef) => {
         console.log("Document written with ID: ", docRef.id);
-        alert('コメントしました');
+        alert("コメントしました");
       })
       .catch((error) => {
         console.error("Error adding document: ", error);
-        alert('コメントできませんでした');
+        alert("コメントできませんでした");
       });
 
     setComment("");
-  }
+  };
 
-  useEffect(()=>{
-    //firebaseからcommentsを取得
-    console.log(todo.id);
+  useEffect(() => {
+    const unSub = db
+      .collection("comments")
+      .where("todoId", "==", todo.id)
+      .orderBy("datetime")
+      .onSnapshot((snapshot) => {
+        setCommentList(
+          snapshot.docs.map((doc) => ({
+            id: doc.id,
+            comment: doc.data().comment,
+          }))
+        );
+      });
+
+    return () => unSub();
+  }, []);
+
+  const todoDelete = (path) => {
+    const result = confirm("このTODOを削除しますか？");
+    if (result) {
+      db.collection("todos")
+        .doc(todo.id)
+        .delete()
+        .then(() => {
+          console.log("Document successfully deleted!");
+          Router.push(path);
+        })
+        .catch((error) => {
+          console.error("Error removing document: ", error);
+        });
+    }
+  };
+
+  const cmtDelete = (id) => {
+    const result = confirm("このコメントを削除しますか？");
+    if (result) {
+      db.collection("comments")
+        .doc(id)
+        .delete()
+        .then(() => {
+          console.log("Document successfully deleted!");
+        })
+        .catch((error) => {
+          console.error("Error removing document: ", error);
+        });
+    }
+  };
 
 
-  const unSub = db.collection('comments').where('todoId','==',todo.id).orderBy('datetime').onSnapshot((snapshot)=>{
-    setCommentList(
-      snapshot.docs.map((doc)=>({
-        id:doc.id,
-        comment: doc.data().comment
-      }))
-      
-      )
-  })
 
-  return ()=> unSub()
-  },[])
-
-
+  ////////描画エリア////////
   return (
     <div>
       <h1>TODO詳細</h1>
@@ -61,16 +95,14 @@ export default ({todo}) => {
       <p>{todo.limit}</p>
       <p>{todo.status}</p>
 
-      <Link href={`/todos/${todo.id}/edit`}>
+      <Link as={ `/todos/${todo.id}/edit`}
+      href={{ pathname: `/todos/${todo.id}/edit`, query: todo.id}}>
         <button>編集</button>
       </Link>
 
-      <button>削除</button>
+      <button onClick={() => todoDelete("/todos")}>削除</button>
 
-      <Link href="/todos">
-        <button>TODO一覧へ戻る</button>
-      </Link>
-
+      <div>
       <h3>コメント</h3>
 
       <label>
@@ -84,17 +116,24 @@ export default ({todo}) => {
           onChange={inputCmt}
         />
       </label>
-      <button onClick={pushCmt}>書き込む</button>
+      <button onClick={pushCmt} disabled={comment === ''}>書き込む</button>
 
       {commentList.map((cmt) => (
-          <div key={cmt.id}>
-            <p>{cmt.comment}</p>
-          </div>
-        ))}
+        <div key={cmt.id}>
+          <span>{cmt.comment}</span>
+          <button onClick={() => cmtDelete(cmt.id)}>削除</button>
+        </div>
+      ))}
+      </div>
+
+      <Link href="/todos">
+        <button>TODO一覧へ戻る</button>
+      </Link>
     </div>
   );
 };
 
+//////// Next.js関数 ////////
 export const getStaticPaths = async () => {
   // 外部APIエンドポイントを呼び出しデータ取得
   const todos = [];
@@ -123,7 +162,6 @@ export const getStaticPaths = async () => {
 
 // paramsには上記pathsで指定した値が入る（1postずつ）
 export const getStaticProps = async ({ params }) => {
-
   //firebaseからtodosを取得
   const todos = [];
   const ref1 = await db.collection("todos").orderBy("datetime").get();
@@ -141,7 +179,6 @@ export const getStaticProps = async ({ params }) => {
     return to.id === params.id;
   });
 
-  
   // ページコンポーネントにpropsとしてに渡す
   return {
     props: {
@@ -149,7 +186,6 @@ export const getStaticProps = async ({ params }) => {
     },
   };
 };
-
 
 // export async function getStaticProps() {
 //   const comments = [];

@@ -1,6 +1,5 @@
 import Head from "next/head";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { db } from "../../src/lib/firebase";
 
 export default function Home( { todos } ) {
@@ -25,6 +24,8 @@ export default function Home( { todos } ) {
   //   return () => lists();
   // }, []);
 
+
+   ////////描画エリア////////
   return (
     <div>
       <Head>
@@ -54,6 +55,7 @@ export default function Home( { todos } ) {
 }
 
 
+//////// Next.js関数 ////////
 export async function getServerSideProps() {
   const todos = [];
   const ref = await db.collection('todos').orderBy('datetime').get();
