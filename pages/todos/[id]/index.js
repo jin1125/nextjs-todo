@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { db } from "../../../src/lib/firebase";
 
 // post：getStaticPropsから取得したデータ
-export default ({ todo }) => {
+export default function Detail({ todo }) {
   ////////ステートエリア////////
   const [comment, setComment] = useState("");
   const [commentList, setCommentList] = useState([]);
