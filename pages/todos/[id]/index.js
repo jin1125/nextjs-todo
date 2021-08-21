@@ -1,13 +1,13 @@
 import firebase from "firebase/app";
 import "firebase/firestore";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { db } from "../../../src/lib/firebase";
 
 // post：getStaticPropsから取得したデータ
-export default ({ todo,comments }) => {
+export default ({todo}) => {
   const [comment, setComment] = useState("");
-  const [commentList, setCommentList] = useState("");
+  const [commentList, setCommentList] = useState([]);
 
   const inputCmt = (e) => {
     setComment(e.target.value)
@@ -34,6 +34,24 @@ export default ({ todo,comments }) => {
 
     setComment("");
   }
+
+  useEffect(()=>{
+    //firebaseからcommentsを取得
+    console.log(todo.id);
+
+
+  const unSub = db.collection('comments').where('todoId','==',todo.id).orderBy('datetime').onSnapshot((snapshot)=>{
+    setCommentList(
+      snapshot.docs.map((doc)=>({
+        id:doc.id,
+        comment: doc.data().comment
+      }))
+      
+      )
+  })
+
+  return ()=> unSub()
+  },[])
 
 
   return (
@@ -68,7 +86,7 @@ export default ({ todo,comments }) => {
       </label>
       <button onClick={pushCmt}>書き込む</button>
 
-      {comments.map((cmt) => (
+      {commentList.map((cmt) => (
           <div key={cmt.id}>
             <p>{cmt.comment}</p>
           </div>
@@ -123,25 +141,11 @@ export const getStaticProps = async ({ params }) => {
     return to.id === params.id;
   });
 
-
-  //firebaseからcommentsを取得
-  const comments = [];
-  const ref2 = await db.collection('comments').orderBy('datetime').get();
-  ref2.docs.map((doc) => {
-    const data = {
-      id: doc.id,
-      comment: doc.data().comment,
-    };
-    comments.push(data);
-  });
-
-
-
+  
   // ページコンポーネントにpropsとしてに渡す
   return {
     props: {
       todo,
-      comments
     },
   };
 };
