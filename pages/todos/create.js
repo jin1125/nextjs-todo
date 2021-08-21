@@ -1,10 +1,9 @@
+import firebase from "firebase/app";
 import "firebase/firestore";
 import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
 import { db } from "../../src/lib/firebase.js";
-import firebase from "firebase/app";
-
 
 export default function Create() {
   ////////ステートエリア////////
@@ -26,38 +25,39 @@ export default function Create() {
   };
 
   const inputTodos = () => {
-    const todoList = {
+    const todo = {
       title: title,
       limit: limit,
       status: status,
-      datetime:firebase.firestore.Timestamp.now(),
+      datetime: firebase.firestore.Timestamp.now(),
     };
 
-    
-    db.collection('todos')
-    .add(todoList)
-    .then((docRef) => {
-      console.log("Document written with ID: ", docRef.id);
-  })
-  .catch((error) => {
-      console.error("Error adding document: ", error);
-  });
+    db.collection("todos")
+      .add(todo)
+      .then((docRef) => {
+        console.log("Document written with ID: ", docRef.id);
+        alert('TODOが作成できました');
+      })
+      .catch((error) => {
+        console.error("Error adding document: ", error);
+        alert('TODO作成に失敗しました');
+      });
 
-  console.log(todoList);
-    
     setTitle("");
     setLimit("");
-    
   };
-  
+
+  const check = title === "" || limit === "";
 
   ////////描画エリア////////
   return (
     <>
       <Head>
-        <title>TODOアプリ作成(Next.js)</title>
+        <title>TODO作成(Next.js)</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
+      <h1>TODO作成</h1>
 
       {/*  */}
 
@@ -100,7 +100,9 @@ export default function Create() {
       {/*  */}
 
       <br />
-      <button onClick={inputTodos}>TODO作成</button>
+      <button onClick={inputTodos} disabled={false}>
+        TODOを作成する
+      </button>
 
       <Link href="/todos">
         <button>TODO一覧へ戻る</button>
@@ -108,3 +110,6 @@ export default function Create() {
     </>
   );
 }
+
+
+
