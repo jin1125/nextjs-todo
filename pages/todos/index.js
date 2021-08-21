@@ -39,7 +39,9 @@ export default function Home( { todos } ) {
             <h3>{todo.title}</h3>
             <p>{todo.limit}</p>
             <p>{todo.status}</p>
+            <Link href={`/todos/${todo.id}`}>
             <button>詳細</button>
+            </Link>
           </div>
         ))}
       </div>
@@ -64,7 +66,7 @@ export async function getServerSideProps() {
     };
     todos.push(data);
   });
-  
+
   return {
     props: {
       todos,
