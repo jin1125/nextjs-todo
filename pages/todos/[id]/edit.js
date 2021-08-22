@@ -1,25 +1,31 @@
 import "firebase/firestore";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
-import { db } from "../../../src/lib/firebase";
+import { useEffect, useState } from "react";
+import { auth, db } from "../../../src/lib/firebase";
+import Router from "next/router";
 
 export default function Edit({ todos }) {
   const router = useRouter();
-  console.log(todos);
 
   const todo = todos.find((to) => {
     return to.id === router.query.id;
   });
 
-  console.log(todo);
 
   ////////ステートエリア////////
   const [title, setTitle] = useState(todo.title);
   const [limit, setLimit] = useState(todo.limit);
-  const [status, setStatus] = useState(todo.status);
+  const [status, setStatus] = useState('');
 
   ////////関数エリア////////
+  useEffect(() => {
+    const unSub =  auth.onAuthStateChanged((user) => {
+       !user && Router.push(`/todos/${router.query.id}`);
+     });
+     return ()=> unSub();
+   }, []);
+
   const editTitle = (e) => {
     setTitle(e.target.value);
   };
@@ -32,7 +38,7 @@ export default function Edit({ todos }) {
     setStatus(e.target.value);
   };
 
-  const editTodos = () => {
+  const editTodos = (path) => {
     const todo = {
       title: title,
       limit: limit,
@@ -46,6 +52,7 @@ export default function Edit({ todos }) {
       .then(() => {
         console.log("Document successfully written!");
         alert("TODOが編集されました");
+        Router.push(path);
       })
       .catch((error) => {
         console.error("Error writing document: ", error);
@@ -102,7 +109,7 @@ export default function Edit({ todos }) {
       {/*  */}
 
       <br />
-      <button onClick={editTodos} disabled={false}>
+      <button onClick={() => editTodos(`/todos/${router.query.id}`)} disabled={check}>
         TODOを編集する
       </button>
 

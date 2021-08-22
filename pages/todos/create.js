@@ -2,8 +2,9 @@ import firebase from "firebase/app";
 import "firebase/firestore";
 import Head from "next/head";
 import Link from "next/link";
-import { useState } from "react";
-import { db } from "../../src/lib/firebase.js";
+import { useEffect, useState } from "react";
+import { auth, db } from "../../src/lib/firebase.js";
+import Router from "next/router";
 
 export default function Create() {
   ////////ステートエリア////////
@@ -12,6 +13,14 @@ export default function Create() {
   const [status, setStatus] = useState("");
 
   ////////関数エリア////////
+  useEffect(() => {
+    const unSub =  auth.onAuthStateChanged((user) => {
+       !user && Router.push("/todos");
+     });
+     return ()=> unSub();
+   }, []);
+
+
   const inputTitle = (e) => {
     setTitle(e.target.value);
   };
