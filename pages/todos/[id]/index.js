@@ -97,7 +97,7 @@ export default function Detail({ todo }) {
 
       <Link as={ `/todos/${todo.id}/edit`}
       href={{ pathname: `/todos/${todo.id}/edit`, query: todo.id}}>
-        <button>編集</button>
+        <button>編集(ログインユーザーのみ)</button>
       </Link>
 
       <button onClick={() => todoDelete("/todos")}>削除</button>

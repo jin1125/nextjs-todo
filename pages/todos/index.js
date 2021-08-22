@@ -170,7 +170,7 @@ export default function Home({ todos }) {
       {/*  */}
 
       <Link href="/todos/create">
-        <button>TODO作成</button>
+        <button>TODO作成(ログインユーザーのみ)</button>
       </Link>
 
       {/*  */}
