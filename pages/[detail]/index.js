@@ -1,43 +1,39 @@
 import firebase from "firebase/app";
 import "firebase/firestore";
+import Head from "next/head";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import Router, { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import Router from 'next/router'
 import { db } from "../../firebase";
 
 export default function Detail() {
   const router = useRouter();
 
   //////// ステートエリア ////////
-  const [todo,setTodo] = useState({});
-  const [id,setId] = useState('');
+  const [todo, setTodo] = useState({});
+  const [id, setId] = useState("");
   const [comment, setComment] = useState("");
   const [commentList, setCommentList] = useState([]);
 
-
   //////// firebaseデータ取得 ////////
-  useEffect(()=>{
- 
-  const lists = db.collection("todos").doc(router.query.detail);
-  lists
-    .get()
-    .then((doc) => {
-      if (doc.exists) {
-        console.log("Document data:", doc.data());
-        setTodo(doc.data())
-        setId(doc.id);
-      } else {
-        // doc.data() will be undefined in this case
-        console.log("No such document!");
-      }
-    })
-    .catch((error) => {
-      console.log("Error getting document:", error);
-    });
-    
-  },[router.query.detail])
-
+  useEffect(() => {
+    const lists = db.collection("todos").doc(router.query.detail);
+    lists
+      .get()
+      .then((doc) => {
+        if (doc.exists) {
+          console.log("Document data:", doc.data());
+          setTodo(doc.data());
+          setId(doc.id);
+        } else {
+          // doc.data() will be undefined in this case
+          console.log("No such document!");
+        }
+      })
+      .catch((error) => {
+        console.log("Error getting document:", error);
+      });
+  }, [router.query.detail]);
 
   //////// 関数エリア ////////
   const inputCmt = (e) => {
@@ -65,12 +61,11 @@ export default function Detail() {
     setComment("");
   };
 
-  
   useEffect(() => {
-    if(id){
+    if (id) {
       const unSub = db
         .collection("comments")
-        .where("todoId", "==", id )
+        .where("todoId", "==", id)
         .orderBy("datetime")
         .onSnapshot((snapshot) => {
           setCommentList(
@@ -81,9 +76,8 @@ export default function Detail() {
           );
         });
 
-        return () => unSub();
+      return () => unSub();
     }
-
   }, [id]);
 
   const todoDelete = (path) => {
@@ -119,53 +113,78 @@ export default function Detail() {
 
   ////////描画エリア////////
   return (
-    <div>
-      <h1>TODO詳細</h1>
-      <h3>{todo.title}</h3>
-     <p>{todo.limit}</p>
-      <p>{todo.status}</p>
+    <>
+      <Head>
+        <title>TODO詳細(Next.js)</title>
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
 
-      {id && todo ? <Link as={`/${id}/edit`}
-        href={{ pathname: `/[detail]/edit`, query: todo }}
-      >
-        <button>編集(ログインユーザーのみ)</button>
-        </Link>:''}
+      <main className=" font-mono">
+        <div className="text-center">
+          <div className="w-3/5 mx-auto py-14">
+            <div className="shadow-xl">
+              <div className="bg-blue-400 py-3 rounded-t">
+                <h1 className="text-white font-bold text-3xl">TODO詳細</h1>
+              </div>
 
-   
-        
+              <div className="bg-white rounded-b">
+                <div className="py-5">
+                  <h3 className='font-bold text-3xl text-blue-600 mt-3 mb-6'>
+                    <span className='border-b-8 border-blue-300 border-opacity-50'>{todo.title}</span>
+                    </h3>
+                  <p className='my-3'>{`期限の 『${todo.limit}』 までにやりましょう！`}</p>
+                  <p className='my-3'>{`現在、 『${todo.status}』 です！`}</p>
 
-      
+                  {id && todo ? (
+                    <Link
+                      as={`/${id}/edit`}
+                      href={{ pathname: `/[detail]/edit`, query: todo }}
+                    >
+                      <button className="bg-blue-500 font-bold text-white rounded-full py-1 px-4 mt-5 shadow hover:bg-blue-400 mr-3">編集(ログインユーザーのみ)</button>
+                    </Link>
+                  ) : (
+                    ""
+                  )}
 
-      <button onClick={() => todoDelete("/")}>削除</button>
+                  <button className="bg-red-500 font-bold text-white rounded-full py-1 px-4 mt-5 shadow hover:bg-red-400" onClick={() => todoDelete("/")}>削除</button>
+                </div>
+                {/*  */}
+                <div>
+                  <h3 className='text-blue-400 font-bold text-lg mt-7'>コメント</h3>
+                    <input
+                    className="bg-blue-100 text-xs placeholder-blue-300 py-1 pl-2 rounded-l"
+                      type="text"
+                      name="comment"
+                      maxLength="30"
+                      placeholder="30文字まで"
+                      value={comment}
+                      onChange={inputCmt}
+                    />
 
-      <div>
-      <h3>コメント</h3>
+                  <button className="bg-blue-500 text-xs font-bold text-white rounded-r py-1 px-2 shadow hover:bg-blue-400 disabled:opacity-50" onClick={pushCmt} disabled={comment === ""}>
+                  コメントする
+                  </button>
 
-      <label>
-        コメント入力
-        <input
-          type="text"
-          name="comment"
-          maxLength="30"
-          placeholder="30文字まで"
-          value={comment}
-          onChange={inputCmt}
-        />
-      </label>
-      <button onClick={pushCmt} disabled={comment === ''}>書き込む</button>
+                  {commentList.map((cmt) => (
+                    <div key={cmt.id} className='my-4'>
+                      <span className='text-blue-400'>{cmt.comment}</span>
+                      <button className="bg-red-500 text-white text-xs rounded ml-3  px-2 shadow hover:bg-red-400" onClick={() => cmtDelete(cmt.id)}>削除</button>
+                    </div>
+                  ))}
+                </div>
 
-      {commentList.map((cmt) => (
-        <div key={cmt.id}>
-          <span>{cmt.comment}</span>
-          <button onClick={() => cmtDelete(cmt.id)}>削除</button>
+                <div className="text-right">
+                  <Link href="/">
+                    <button className='text-xs p-2 hover:text-gray-300'>TODO一覧へ戻る</button>
+                  </Link>
+                </div>
+
+              </div>
+            </div>
+          </div>
         </div>
-      ))}
-      </div>
-
-      <Link href="/">
-        <button>TODO一覧へ戻る</button>
-      </Link> 
-    </div>
+      </main>
+    </>
   );
 }
 
