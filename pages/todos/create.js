@@ -110,7 +110,7 @@ export default function Create() {
       {/*  */}
 
       <br />
-      <button onClick={inputTodos} disabled={false}>
+      <button onClick={inputTodos} disabled={check}>
         TODOを作成する
       </button>
 

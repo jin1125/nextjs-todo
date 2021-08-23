@@ -1,30 +1,52 @@
+import firebase from "firebase/app";
 import "firebase/firestore";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import Router, { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { auth, db } from "../../../src/lib/firebase";
-import Router from "next/router";
 
-export default function Edit({ todos }) {
+export default function Edit() {
   const router = useRouter();
-
-  const todo = todos.find((to) => {
-    return to.id === router.query.id;
-  });
-
-
   ////////ステートエリア////////
-  const [title, setTitle] = useState(todo.title);
-  const [limit, setLimit] = useState(todo.limit);
-  const [status, setStatus] = useState('');
 
-  ////////関数エリア////////
+  // const todo = todos.find((to) => {
+  //   return to.id === router.query.id;
+  // });
+
+  const [title, setTitle] = useState(router.query.title);
+  const [limit, setLimit] = useState(router.query.limit);
+  const [status, setStatus] = useState("");
+
+
+  console.log(router.query.title);
+
+  //////// firebaseデータ取得 ////////
+
   useEffect(() => {
-    const unSub =  auth.onAuthStateChanged((user) => {
-       !user && Router.push(`/todos/${router.query.id}`);
-     });
-     return ()=> unSub();
-   }, []);
+    const todo = db.collection("todos").doc("SF");
+
+    todo
+      .get()
+      .then((doc) => {
+        if (doc.exists) {
+          console.log("Document data:", doc.data());
+        } else {
+          // doc.data() will be undefined in this case
+          console.log("No such document!");
+        }
+      })
+      .catch((error) => {
+        console.log("Error getting document:", error);
+      });
+  }, []);
+
+  //////////関数エリア////////
+  useEffect(() => {
+    const unSub = auth.onAuthStateChanged((user) => {
+      !user && Router.push(`/todos/${router.query.detail}`);
+    });
+    return () => unSub();
+  }, []);
 
   const editTitle = (e) => {
     setTitle(e.target.value);
@@ -43,12 +65,12 @@ export default function Edit({ todos }) {
       title: title,
       limit: limit,
       status: status,
-      // datetime: firebase.firestore.Timestamp.now(),
+      datetime: firebase.firestore.Timestamp.now(),
     };
 
     db.collection("todos")
-      .doc(router.query.id)
-      .set(todo,{merge: true})
+      .doc(router.query.detail)
+      .set(todo, { merge: true })
       .then(() => {
         console.log("Document successfully written!");
         alert("TODOが編集されました");
@@ -109,11 +131,14 @@ export default function Edit({ todos }) {
       {/*  */}
 
       <br />
-      <button onClick={() => editTodos(`/todos/${router.query.id}`)} disabled={check}>
+      <button
+        onClick={() => editTodos(`/todos/${router.query.detail}`)}
+        disabled={check}
+      >
         TODOを編集する
       </button>
 
-      <Link href={`/todos/${router.query.id}`}>
+      <Link href={`/todos/${router.query.detail}`}>
         <button>戻る</button>
       </Link>
     </div>
@@ -121,22 +146,22 @@ export default function Edit({ todos }) {
 }
 
 //////// Next.js関数 ////////
-export async function getServerSideProps() {
-  const todos = [];
-  const ref = await db.collection("todos").orderBy("datetime").get();
-  ref.docs.map((doc) => {
-    const data = {
-      id: doc.id,
-      title: doc.data().title,
-      limit: doc.data().limit,
-      status: doc.data().status,
-    };
-    todos.push(data);
-  });
+// export async function getServerSideProps() {
+//   const todos = [];
+//   const ref = await db.collection("todos").orderBy("datetime").get();
+//   ref.docs.map((doc) => {
+//     const data = {
+//       id: doc.id,
+//       title: doc.data().title,
+//       limit: doc.data().limit,
+//       status: doc.data().status,
+//     };
+//     todos.push(data);
+//   });
 
-  return {
-    props: {
-      todos,
-    },
-  };
-}
+//   return {
+//     props: {
+//       todos,
+//     },
+//   };
+// }

@@ -1,17 +1,45 @@
 import firebase from "firebase/app";
 import "firebase/firestore";
 import Link from "next/link";
-import Router from "next/router";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import Router from 'next/router'
 import { db } from "../../../src/lib/firebase";
 
-// post：getStaticPropsから取得したデータ
-export default function Detail({ todo }) {
-  ////////ステートエリア////////
+export default function Detail() {
+  const router = useRouter();
+
+  //////// ステートエリア ////////
+  const [todo,setTodo] = useState({});
+  const [id,setId] = useState('');
   const [comment, setComment] = useState("");
   const [commentList, setCommentList] = useState([]);
 
-  ////////関数エリア////////
+
+  //////// firebaseデータ取得 ////////
+  useEffect(()=>{
+ 
+  const lists = db.collection("todos").doc(router.query.detail);
+  lists
+    .get()
+    .then((doc) => {
+      if (doc.exists) {
+        console.log("Document data:", doc.data());
+        setTodo(doc.data())
+        setId(doc.id);
+      } else {
+        // doc.data() will be undefined in this case
+        console.log("No such document!");
+      }
+    })
+    .catch((error) => {
+      console.log("Error getting document:", error);
+    });
+    
+  },[router.query.detail])
+
+
+  //////// 関数エリア ////////
   const inputCmt = (e) => {
     setComment(e.target.value);
   };
@@ -20,7 +48,7 @@ export default function Detail({ todo }) {
     const cmt = {
       comment: comment,
       datetime: firebase.firestore.Timestamp.now(),
-      todoId: todo.id,
+      todoId: id,
     };
 
     db.collection("comments")
@@ -37,28 +65,32 @@ export default function Detail({ todo }) {
     setComment("");
   };
 
+  
   useEffect(() => {
-    const unSub = db
-      .collection("comments")
-      .where("todoId", "==", todo.id)
-      .orderBy("datetime")
-      .onSnapshot((snapshot) => {
-        setCommentList(
-          snapshot.docs.map((doc) => ({
-            id: doc.id,
-            comment: doc.data().comment,
-          }))
-        );
-      });
+    if(id){
+      const unSub = db
+        .collection("comments")
+        .where("todoId", "==", id )
+        .orderBy("datetime")
+        .onSnapshot((snapshot) => {
+          setCommentList(
+            snapshot.docs.map((doc) => ({
+              id: doc.id,
+              comment: doc.data().comment,
+            }))
+          );
+        });
 
-    return () => unSub();
-  }, []);
+        return () => unSub();
+    }
+
+  }, [id]);
 
   const todoDelete = (path) => {
     const result = confirm("このTODOを削除しますか？");
     if (result) {
       db.collection("todos")
-        .doc(todo.id)
+        .doc(id)
         .delete()
         .then(() => {
           console.log("Document successfully deleted!");
@@ -85,20 +117,24 @@ export default function Detail({ todo }) {
     }
   };
 
-
-
   ////////描画エリア////////
   return (
     <div>
       <h1>TODO詳細</h1>
       <h3>{todo.title}</h3>
-      <p>{todo.limit}</p>
+     <p>{todo.limit}</p>
       <p>{todo.status}</p>
 
-      <Link as={ `/todos/${todo.id}/edit`}
-      href={{ pathname: `/todos/${todo.id}/edit`, query: todo.id}}>
+      {id && todo ? <Link as={`/todos/${id}/edit`}
+        href={{ pathname: `/todos/[detail]/edit`, query: todo }}
+      >
         <button>編集(ログインユーザーのみ)</button>
-      </Link>
+        </Link>:''}
+
+   
+        
+
+      
 
       <button onClick={() => todoDelete("/todos")}>削除</button>
 
@@ -128,64 +164,64 @@ export default function Detail({ todo }) {
 
       <Link href="/todos">
         <button>TODO一覧へ戻る</button>
-      </Link>
+      </Link> 
     </div>
   );
-};
+}
 
 //////// Next.js関数 ////////
-export const getStaticPaths = async () => {
-  // 外部APIエンドポイントを呼び出しデータ取得
-  const todos = [];
-  const ref = await db.collection("todos").orderBy("datetime").get();
-  ref.docs.map((doc) => {
-    const data = {
-      id: doc.id,
-      title: doc.data().title,
-      limit: doc.data().limit,
-      status: doc.data().status,
-    };
-    todos.push(data);
-  });
+// export const getStaticPaths = async () => {
+//   // 外部APIエンドポイントを呼び出しデータ取得
+//   const todos = [];
+//   const ref = await db.collection("todos").orderBy("datetime").get();
+//   ref.docs.map((doc) => {
+//     const data = {
+//       id: doc.id,
+//       title: doc.data().title,
+//       limit: doc.data().limit,
+//       status: doc.data().status,
+//     };
+//     todos.push(data);
+//   });
 
-  // 事前ビルドしたいパスを指定
-  const paths = todos.map((todo) => ({
-    params: {
-      // ファイル名と合わせる ※文字列指定
-      id: todo.id.toString(),
-    },
-  }));
-  // paths：事前ビルドするパス対象を指定するパラメータ
-  // fallback：事前ビルドしたパス以外にアクセスしたときのパラメータ true:カスタム404Pageを表示 false:404pageを表示
-  return { paths, fallback: false };
-};
+//   // 事前ビルドしたいパスを指定
+//   const paths = todos.map((todo) => ({
+//     params: {
+//       // ファイル名と合わせる ※文字列指定
+//       id: todo.id.toString(),
+//     },
+//   }));
+//   // paths：事前ビルドするパス対象を指定するパラメータ
+//   // fallback：事前ビルドしたパス以外にアクセスしたときのパラメータ true:カスタム404Pageを表示 false:404pageを表示
+//   return { paths, fallback: false };
+// };
 
 // paramsには上記pathsで指定した値が入る（1postずつ）
-export const getStaticProps = async ({ params }) => {
-  //firebaseからtodosを取得
-  const todos = [];
-  const ref1 = await db.collection("todos").orderBy("datetime").get();
-  ref1.docs.map((doc) => {
-    const data = {
-      id: doc.id,
-      title: doc.data().title,
-      limit: doc.data().limit,
-      status: doc.data().status,
-    };
-    todos.push(data);
-  });
+// export const getStaticProps = async ({ params }) => {
+//   //firebaseからtodosを取得
+//   const todos = [];
+//   const ref1 = await db.collection("todos").orderBy("datetime").get();
+//   ref1.docs.map((doc) => {
+//     const data = {
+//       id: doc.id,
+//       title: doc.data().title,
+//       limit: doc.data().limit,
+//       status: doc.data().status,
+//     };
+//     todos.push(data);
+//   });
 
-  const todo = todos.find((to) => {
-    return to.id === params.id;
-  });
+//   const todo = todos.find((to) => {
+//     return to.id === params.id;
+//   });
 
-  // ページコンポーネントにpropsとしてに渡す
-  return {
-    props: {
-      todo,
-    },
-  };
-};
+//   // ページコンポーネントにpropsとしてに渡す
+//   return {
+//     props: {
+//       todo,
+//     },
+//   };
+// };
 
 // export async function getStaticProps() {
 //   const comments = [];

@@ -4,46 +4,47 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { auth, db } from "../../src/lib/firebase";
 
-export default function Home({ todos }) {
-  const [todoList, setTodoList] = useState(todos);
+export default function Home() {
+  ////// データ取得 //////
+  const [todoList, setTodoList] = useState([]);
+
+  useEffect(() => {
+    const lists = db
+      .collection("todos")
+      .orderBy("datetime")
+      .onSnapshot((snapshot) => {
+        setTodoList(
+          snapshot.docs.map((doc) => ({
+            id: doc.id,
+            title: doc.data().title,
+            limit: doc.data().limit,
+            status: doc.data().status,
+            datetime: doc.data().datetime.toDate().getTime(0),
+          }))
+        );
+      });
+
+    return () => lists();
+  }, []);
+
+  ////// ステートエリア //////
   const [filter, setFilter] = useState("");
   const [imcompleteList, setImcompleteList] = useState([]);
   const [workingList, setWorkingList] = useState([]);
   const [completeList, setCompleteList] = useState([]);
-  const [isLogin,setIsLogin] = useState(false);
-
-  ////// Reactバージョン //////
-  // const [todos, setTodos] = useState([
-  //   { id: "", title: "", limit: "", status: "" },
-  // ]);
-
-  // useEffect(() => {
-  //   const lists = db.collection("todos").orderBy('datetime').onSnapshot((snapshot) => {
-  //     setTodos(
-  //       snapshot.docs.map((doc) => ({
-  //         id: doc.id,
-  //         title: doc.data().title,
-  //         limit: doc.data().limit,
-  //         status: doc.data().status,
-  //       }))
-  //     );
-  //   });
-
-  //   return () => lists();
-  // }, []);
+  const [isLogin, setIsLogin] = useState(false);
 
   //ログイン判定
   useEffect(() => {
-    const unSub =  auth.onAuthStateChanged((user) => {
-       if(user){
-        setIsLogin(true)
-       }else{
-        setIsLogin(false)
-       }
-     });
-     return ()=> unSub();
-   }, []);
-
+    const unSub = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setIsLogin(true);
+      } else {
+        setIsLogin(false);
+      }
+    });
+    return () => unSub();
+  }, []);
 
   //ソート機能
   const sortTodo = (e) => {
@@ -70,7 +71,7 @@ export default function Home({ todos }) {
     }
   };
 
-  //// フィルタ機能 ////
+  ///// フィルタ機能 /////
 
   //未完了フィルター
   useEffect(() => {
@@ -133,26 +134,27 @@ export default function Home({ todos }) {
       {/*  */}
 
       <div>
-        
-        <Link href='../login'>
-        <button>ログイン/新規登録</button>
+        <Link href="../login">
+          <button>ログイン/新規登録</button>
         </Link>
-        <button onClick={
-          async ()=>{
-            const result = confirm('ログアウトしますか？');
-            if(result){
-              try{
+        <button
+          onClick={async () => {
+            const result = confirm("ログアウトしますか？");
+            if (result) {
+              try {
                 await auth.signOut();
-                alert('ログアウトしました')
-              }catch(error){
-                alert('ログアウトできませんでした')
+                alert("ログアウトしました");
+              } catch (error) {
+                alert("ログアウトできませんでした");
               }
             }
-          }
-        }>ログアウト</button>
+          }}
+        >
+          ログアウト
+        </button>
 
-        {isLogin ? <p>ログイン中です</p>:<p>ログアウト中です</p>}
-        
+        {isLogin ? <p>ログイン中です</p> : <p>ログアウト中です</p>}
+
         <h1>TODO一覧</h1>
 
         {filtered.map((todo) => (
@@ -207,24 +209,24 @@ export default function Home({ todos }) {
   );
 }
 
-//////// Next.js関数 ////////
-export async function getServerSideProps() {
-  const todos = [];
-  const ref = await db.collection("todos").orderBy("datetime").get();
-  ref.docs.map((doc) => {
-    const data = {
-      id: doc.id,
-      title: doc.data().title,
-      limit: doc.data().limit,
-      status: doc.data().status,
-      datetime: doc.data().datetime.toDate().getTime(0),
-    };
-    todos.push(data);
-  });
+//////// Next.js関数(ボツ) ////////
+// export async function getServerSideProps() {
+//   const todos = [];
+//   const ref = await db.collection("todos").orderBy("datetime").get();
+//   ref.docs.map((doc) => {
+//     const data = {
+//       id: doc.id,
+//       title: doc.data().title,
+//       limit: doc.data().limit,
+//       status: doc.data().status,
+//       datetime: doc.data().datetime.toDate().getTime(0),
+//     };
+//     todos.push(data);
+//   });
 
-  return {
-    props: {
-      todos,
-    },
-  };
-}
+//   return {
+//     props: {
+//       todos,
+//     },
+//   };
+// }
