@@ -130,7 +130,7 @@ export default function Detail() {
               <div className="bg-white rounded-b">
                 <div className="py-5">
                   <h3 className='font-bold text-3xl text-blue-600 mt-3 mb-6'>
-                    <span className='border-b-8 border-blue-300 border-opacity-50'>{todo.title}</span>
+                    <span className='border-b-8 border-blue-300 border-opacity-50 break-words'>{todo.title}</span>
                     </h3>
                   <p className='my-3'>{`期限の 『${todo.limit}』 までにやりましょう！`}</p>
                   <p className='my-3'>{`現在、 『${todo.status}』 です！`}</p>
