@@ -3,47 +3,20 @@ import "firebase/firestore";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { auth, db } from "../../../src/lib/firebase";
+import { auth, db } from "../../src/lib/firebase";
 
 export default function Edit() {
   const router = useRouter();
+
   ////////ステートエリア////////
-
-  // const todo = todos.find((to) => {
-  //   return to.id === router.query.id;
-  // });
-
   const [title, setTitle] = useState(router.query.title);
   const [limit, setLimit] = useState(router.query.limit);
   const [status, setStatus] = useState("");
 
-
-  console.log(router.query.title);
-
-  //////// firebaseデータ取得 ////////
-
-  useEffect(() => {
-    const todo = db.collection("todos").doc("SF");
-
-    todo
-      .get()
-      .then((doc) => {
-        if (doc.exists) {
-          console.log("Document data:", doc.data());
-        } else {
-          // doc.data() will be undefined in this case
-          console.log("No such document!");
-        }
-      })
-      .catch((error) => {
-        console.log("Error getting document:", error);
-      });
-  }, []);
-
   //////////関数エリア////////
   useEffect(() => {
     const unSub = auth.onAuthStateChanged((user) => {
-      !user && Router.push(`/todos/${router.query.detail}`);
+      !user && Router.push(`/${router.query.detail}`);
     });
     return () => unSub();
   }, []);
@@ -132,13 +105,13 @@ export default function Edit() {
 
       <br />
       <button
-        onClick={() => editTodos(`/todos/${router.query.detail}`)}
+        onClick={() => editTodos(`/${router.query.detail}`)}
         disabled={check}
       >
         TODOを編集する
       </button>
 
-      <Link href={`/todos/${router.query.detail}`}>
+      <Link href={`/${router.query.detail}`}>
         <button>戻る</button>
       </Link>
     </div>

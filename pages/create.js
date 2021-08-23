@@ -3,7 +3,7 @@ import "firebase/firestore";
 import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { auth, db } from "../../src/lib/firebase.js";
+import { auth, db } from "../src/lib/firebase.js";
 import Router from "next/router";
 
 export default function Create() {
@@ -15,7 +15,7 @@ export default function Create() {
   ////////関数エリア////////
   useEffect(() => {
     const unSub =  auth.onAuthStateChanged((user) => {
-       !user && Router.push("/todos");
+       !user && Router.push("/");
      });
      return ()=> unSub();
    }, []);
@@ -114,7 +114,7 @@ export default function Create() {
         TODOを作成する
       </button>
 
-      <Link href="/todos">
+      <Link href="/">
         <button>TODO一覧へ戻る</button>
       </Link>
     </>

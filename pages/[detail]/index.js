@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Router from 'next/router'
-import { db } from "../../../src/lib/firebase";
+import { db } from "../../src/lib/firebase";
 
 export default function Detail() {
   const router = useRouter();
@@ -125,8 +125,8 @@ export default function Detail() {
      <p>{todo.limit}</p>
       <p>{todo.status}</p>
 
-      {id && todo ? <Link as={`/todos/${id}/edit`}
-        href={{ pathname: `/todos/[detail]/edit`, query: todo }}
+      {id && todo ? <Link as={`/${id}/edit`}
+        href={{ pathname: `/[detail]/edit`, query: todo }}
       >
         <button>編集(ログインユーザーのみ)</button>
         </Link>:''}
@@ -136,7 +136,7 @@ export default function Detail() {
 
       
 
-      <button onClick={() => todoDelete("/todos")}>削除</button>
+      <button onClick={() => todoDelete("/")}>削除</button>
 
       <div>
       <h3>コメント</h3>
@@ -162,7 +162,7 @@ export default function Detail() {
       ))}
       </div>
 
-      <Link href="/todos">
+      <Link href="/">
         <button>TODO一覧へ戻る</button>
       </Link> 
     </div>

@@ -2,7 +2,7 @@ import "firebase/firestore";
 import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { auth, db } from "../../src/lib/firebase";
+import { auth, db } from "../src/lib/firebase";
 
 export default function Home() {
   ////// データ取得 //////
@@ -134,7 +134,7 @@ export default function Home() {
       {/*  */}
 
       <div>
-        <Link href="../login">
+        <Link href="./login">
           <button>ログイン/新規登録</button>
         </Link>
         <button
@@ -162,7 +162,7 @@ export default function Home() {
             <h3>{todo.title}</h3>
             <p>{todo.limit}</p>
             <p>{todo.status}</p>
-            <Link href={`/todos/${todo.id}`}>
+            <Link href={`/${todo.id}`}>
               <button>詳細</button>
             </Link>
           </div>
@@ -171,7 +171,7 @@ export default function Home() {
 
       {/*  */}
 
-      <Link href="/todos/create">
+      <Link href="/create">
         <button>TODO作成(ログインユーザーのみ)</button>
       </Link>
 

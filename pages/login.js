@@ -10,7 +10,7 @@ export default function Login() {
 
   useEffect(() => {
     const unSub = auth.onAuthStateChanged((user) => {
-      user && Router.push("/todos");
+      user && Router.push("/");
     });
     return () => unSub();
   }, []);
@@ -53,7 +53,7 @@ export default function Login() {
                     try {
                       await auth.signInWithEmailAndPassword(email, password);
                       alert("ログインしました");
-                      Router.push("/todos");
+                      Router.push("/");
                     } catch (error) {
                       alert("アカウントが見つかりませんでした");
                     }
@@ -65,7 +65,7 @@ export default function Login() {
                         password
                       );
                       alert("アカウントを作成できました");
-                      Router.push("/todos");
+                      Router.push("/");
                     } catch (error) {
                       alert("エラー 正しい内容を入力してください");
                     }
