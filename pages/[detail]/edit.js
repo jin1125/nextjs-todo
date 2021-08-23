@@ -3,7 +3,7 @@ import "firebase/firestore";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { auth, db } from "../../src/lib/firebase";
+import { auth, db } from "../../firebase";
 
 export default function Edit() {
   const router = useRouter();

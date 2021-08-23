@@ -2,7 +2,7 @@ import "firebase/firestore";
 import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { auth, db } from "../src/lib/firebase";
+import { auth, db } from "../firebase";
 
 export default function Home() {
   ////// データ取得 //////

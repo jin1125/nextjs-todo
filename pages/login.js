@@ -1,7 +1,7 @@
 import "firebase/auth";
 import Router from "next/router";
 import { useEffect, useState } from "react";
-import { auth } from "../src/lib/firebase.js";
+import { auth } from "../firebase.js";
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);

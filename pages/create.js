@@ -3,7 +3,7 @@ import "firebase/firestore";
 import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { auth, db } from "../src/lib/firebase.js";
+import { auth, db } from "../firebase.js";
 import Router from "next/router";
 
 export default function Create() {

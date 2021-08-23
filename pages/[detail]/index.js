@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Router from 'next/router'
-import { db } from "../../src/lib/firebase";
+import { db } from "../../firebase";
 
 export default function Detail() {
   const router = useRouter();
