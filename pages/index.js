@@ -213,14 +213,14 @@ export default function Home() {
                 
                 <div className='grid grid-cols-2 my-10'>
                 {filtered.map((todo) => (
-                  <div key={todo.id} className='bg-blue-500 rounded m-3 shadow-xl'>
-                    <div className='bg-white border-2 border-blue-500 rounded-t'>
+                  <div key={todo.id} className='bg-blue-400 rounded m-3 shadow-xl'>
+                    <div className='bg-white border-[3px] border-blue-400 rounded-t'>
                     <h3 className='text-blue-500  py-2 text-lg break-words'>{todo.title}</h3>
                     </div>
                     <p  className='text-white my-2'>{`期限 : ${todo.limit}`}</p>
                     <p  className='text-white my-2'>{`進捗状況 : ${todo.status}`}</p>
                     <Link href={`/${todo.id}`}>
-                      <button className='bg-white my-4 font-bold text-blue-600 rounded-full py-1 px-4 hover:bg-blue-500 hover:text-white'>詳細</button>
+                      <button className='bg-white my-4 font-bold text-blue-500 rounded-full py-1 px-4 hover:bg-blue-400 hover:text-white'>詳細</button>
                     </Link>
                   </div>
                 ))}
