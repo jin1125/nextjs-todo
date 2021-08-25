@@ -53,6 +53,7 @@ export default function Login() {
                       autoFocus
                       className="bg-blue-100 mr-5 rounded"
                       name="email"
+                      type='email'
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                     />
@@ -63,6 +64,7 @@ export default function Login() {
                     <input
                       className="bg-blue-100 placeholder-blue-300 pl-2 rounded"
                       name="password"
+                      type='password'
                       value={password}
                       placeholder="6文字以上"
                       onChange={(e) => setPassword(e.target.value)}
